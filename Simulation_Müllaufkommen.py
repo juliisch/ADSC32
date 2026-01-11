@@ -3,20 +3,36 @@
 import random
 import matplotlib.pyplot as plt
 import math
-
+import holidays
 
 # -------------------------------
 # ---------- Variablen ----------
 
+
+# Feiertage bestimmen ---
+# TODO: Abhöngig von Anzahl der WEEKS sollen nur für 2026 oder wietere Jahre bestimmt werden
+year = 2026  # anpassen
+by = holidays.Germany(years=year, subdiv="BY")
+
+feiertage = sorted({
+    d.isocalendar().week
+    for d in by.keys()
+    if d.weekday() in (3, 4)  # 3=Do, 4=Fr
+})
+print(feiertage)
+
+
+
 # Messung pro Woche
-WEEKS = 4 # Anzahl der zu durchlaufenden Wochen
+WEEKS = 14 # Anzahl der zu durchlaufenden Wochen
 
 BIOABFALL_PRO_PERSON = 3.5 # L/Woche
 PAPIER_PRO_PERSON = 15 # L/Woche
 RESTMUELL_PRO_PERSON = 30 # L/Woche
 # Quelle: https://www.awm-muenchen.de/abfall-entsorgen/muelltonnen/fuer-haushalte?utm_source=chatgpt.com
 
-PERCENT_BESUCH = 0.30  # Wie viel Besuch in der Woche kommen in Prozenz
+P_BESUCH = 0.30  # Wahrscheinlichkeit für Besuch
+P_AUSFALL = 0.005 # Wahrscheinlichkeit für Ausfall
 
 MAX_GAESTE = 10
 # Haus mit 6 Wochnungen, in denen maximal 3 Personen (18 in Summe) wohnen können. 
@@ -38,6 +54,7 @@ rest_muelltone_kosten = round(80/52,2)
 bio_muelltone_kosten = 0
 papier_muelltone_kosten = 0
 
+
 gesamt_kosten = 0 
 
 # Metriken zum Speichern
@@ -46,15 +63,15 @@ ergebnisse_abfallmenge = []
 ueberfuellungsraten = []
 kosten_pro_woche = []
 bewohner_pro_woche = []
+besuch_pro_woche = []
 
 def berechnung_sonderkosten(tonne, abfallmenge_woche, muelltone_groesse, sonder_kosten):
 
-    overconsumption = max(0, abfallmenge_woche - muelltone_groesse)
-    #ueberfuellungsrate = max(0, overconsumption/muelltone_groesse*100)
+    uebefuellung = max(0, abfallmenge_woche - muelltone_groesse)
 
-    if overconsumption > 0:
+    if uebefuellung > 0:
         print(f"{tonne}tonne ist voll")
-        sonder_kosten += math.ceil(overconsumption / 70) * 9 # Pro zusätzliche 70 Liter werden 9 € berechnet
+        sonder_kosten += math.ceil(uebefuellung / 70) * 9 # Pro zusätzliche 70 Liter werden 9 € berechnet
         
     return sonder_kosten
 
@@ -84,25 +101,26 @@ for w in range(1, WEEKS + 1):
 
     print(f"Woche {w}")
 
+
     # Anzahl der Bewohner und Besucher bestimmen ---
     anzahl_bewohner = random.randint(min_Bewohner, max_Bewohner)
-    print(f"Anzahl Bewohner {anzahl_bewohner}")
+    #print(f"Anzahl Bewohner {anzahl_bewohner}")
 
     # Szenario: Besuch
     anzahl_gast = 0
-    if random.random() < PERCENT_BESUCH:
+    if random.random() < P_BESUCH:
         anzahl_gast = random.randint(1, MAX_GAESTE)
-    print(f"Anzahl Gäste {anzahl_gast}")
+    #print(f"Anzahl Gäste {anzahl_gast}")
 
     anzahl_personen = anzahl_bewohner + anzahl_gast
-    print(f"Anzahl Personen {anzahl_personen}")
+    #print(f"Anzahl Personen {anzahl_personen}")
 
     # Abfall bestimmen ----
     # Normaler Wochenverbrauch + Besuch-Verbrauch
     rest_abfallmenge_woche = round(anzahl_personen * RESTMUELL_PRO_PERSON ,0)
     rest_abfallmenge_gesamt = rest_abfallmenge_gesamt + rest_abfallmenge_woche
-    print(f"Abfallmenge Restmüll Woche {rest_abfallmenge_woche}")
-    print(f"Abfallmenge Restmüll Gesamt {rest_abfallmenge_gesamt}")
+    #print(f"Abfallmenge Restmüll Woche {rest_abfallmenge_woche}")
+    #print(f"Abfallmenge Restmüll Gesamt {rest_abfallmenge_gesamt}")
 
     #bio_abfallmenge_woche = bio_abfallmenge_woche + round(anzahl_personen * BIOABFALL_PRO_PERSON ,0)
     #papier_abfallmenge_woche = papier_abfallmenge_woche + round(anzahl_personen * PAPIER_PRO_PERSON ,0)
@@ -121,23 +139,33 @@ for w in range(1, WEEKS + 1):
 
     woche_kosten =  sonder_kosten + rest_muelltone_kosten # + papier_muelltone_kosten  + bio_muelltone_kosten 
     gesamt_kosten = gesamt_kosten + woche_kosten
-    print(f"Kosten der Woche {woche_kosten} €")
-    print(f"Gesamtkosten {gesamt_kosten} €")
+    #print(f"Kosten der Woche {woche_kosten} €")
+    #print(f"Gesamtkosten {gesamt_kosten} €")
 
     uebefuellungsrate = berechnung_uebefuellungsrate(abfaelle)
-    print(f"Überfüllungsrate {uebefuellungsrate} %")
+    #print(f"Überfüllungsrate {uebefuellungsrate} %")
 
 
     # Ergebnisse speichern ---
     wochen.append(w)
     bewohner_pro_woche.append(anzahl_bewohner)
+    besuch_pro_woche.append(anzahl_gast)
     ergebnisse_abfallmenge.append(rest_abfallmenge_woche) #ergebnisse_abfallmenge.append((rest_abfallmenge_woche, bio_abfallmenge_woche, papier_abfallmenge_woche))
     ueberfuellungsraten.append(uebefuellungsrate)
     kosten_pro_woche.append(woche_kosten)
 
+    # Ausfall 
+    ausfall = random.random() < P_AUSFALL
+    print(f"Ausfall {ausfall}")
+
     # Müllentleehrung (alle 2 Wochen) ---
     if w % 2 == 0:
-        bio_abfallmenge_woche, plastik_abfallmenge_woche, rest_abfallmenge_gesamt, papier_abfallmenge_woche = leere_muell()
-        print("\nMüll wurde geleert")
+        if ausfall:
+            print("Keine Leehrung, wegen Ausfall")
+        elif w in feiertage:
+            print("Keine Leehrung, wegen Feiertag")
+        else:
+            bio_abfallmenge_woche, plastik_abfallmenge_woche, rest_abfallmenge_gesamt, papier_abfallmenge_woche = leere_muell()
+            print("\nMüll wurde geleert")
 
     print("")
