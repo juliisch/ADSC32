@@ -3,8 +3,10 @@
 import random
 import math
 import simpy
-import matplotlib.pyplot as plt
 import holidays
+from Metriken import plot_metriken
+import statistics as stats
+import matplotlib.pyplot as plt
 
 # -------------------------------
 # ---------- Parameter ----------
@@ -116,7 +118,7 @@ class MuellentsorgungsSystem:
         self.ueberfuellungsrate_woche = [] # Überfüllungsrate
         self.rest_abfallmenge_gesamt_woche = [] # Gesamte Abfallmenge (inkl. Menge der Vorwoche)
         self.sonderentleerung_kosten_woche = []  # Kosten für die Sonderentleerung
-        self.ueberfuellung_kosten_woche = [] # Kosten bei Überfüllung # TODO einbauen
+        self.ueberfuellung_kosten_woche = [] # Kosten bei Überfüllung 
         self.rest_tonne_kapazitaet_woche = [] # Kapazität der Tonne
 
         # Mülltonnen Start-Kapazität und wöchentliche Kosten
@@ -146,9 +148,9 @@ class MuellentsorgungsSystem:
 
             # ---- Abfallmenge pro Woche (abhängig von der Personenanzahl) ----
             rest_abfallmenge_bewohner_woche = round(anzahl_bewohner * RESTMUELL_PRO_PERSON, 0)
-            rest_abfallmenge_besuch_woche = round(anzahl_bewohner * RESTMUELL_PRO_PERSON * 0.15, 0) # Annahme: Besuch verbraucht nur ein Anteil des wöchentlichen Müllverbrauchs
-            rest_abfallmenge_woche = rest_abfallmenge_bewohner_woche + rest_abfallmenge_besuch_woche
-            self.rest_abfallmenge_gesamt += rest_abfallmenge_woche
+            rest_abfallmenge_besuch_woche = round(anzahl_besuch * RESTMUELL_PRO_PERSON * 0.15, 0) # Annahme: Besuch verbraucht nur ein Anteil des wöchentlichen Müllverbrauchs
+            rest_abfallmenge = rest_abfallmenge_bewohner_woche + rest_abfallmenge_besuch_woche
+            self.rest_abfallmenge_gesamt += rest_abfallmenge
 
             # ---- Überfüllungsrate (auf Basis aktuellem Füllstands und Mülltonnenkapazität) ----
             uebefuellungsrate = ueberfuellungsrate(self.rest_abfallmenge_gesamt, self.rest_tonne_kapazitaet)
@@ -198,41 +200,169 @@ class MuellentsorgungsSystem:
                 geleert = True
 
             # --- wöchentliche Kosten ---
-            woche_kosten = self.rest_tonne_kosten_woche + ueberfuellung_kosten +  sonderentleerung_kosten # normale Entleerungskostenn + Überfüllungskosten + Sonderentleerungskosten
+            kosten = self.rest_tonne_kosten_woche + ueberfuellung_kosten +  sonderentleerung_kosten # normale Entleerungskostenn + Überfüllungskosten + Sonderentleerungskosten
 
             # --- Metriken ---
             self.wochen.append(w)
             self.bewohner_woche.append(anzahl_bewohner)
             self.besuch_woche.append(anzahl_besuch)
-            self.rest_abfall_woche.append(rest_abfallmenge_woche)
+            self.rest_abfall_woche.append(rest_abfallmenge)
             self.rest_tonne_kapazitaet_woche.append(self.rest_tonne_kapazitaet)
             self.rest_abfallmenge_gesamt_woche.append(self.rest_abfallmenge_gesamt)
             self.ueberfuellungsrate_woche.append(uebefuellungsrate)
             self.ausfall_woche.append(ausfall)
             self.sonderentleerung_kosten_woche.append(sonderentleerung_kosten)
-            self.kosten_woche.append(woche_kosten)
-
-            print(
-                f"Woche: {w}\n"
-                f"Gäste: {anzahl_besuch}\n"
-                f"Bewohner: {anzahl_bewohner}\n"
-                f"Tonnenkapazität: {self.rest_tonne_kapazitaet} L\n"
-                f"wöchentliche Müllmenge: {rest_abfallmenge_woche} L\n"
-                f"Gesamte Müllmenge: {self.rest_abfallmenge_gesamt} L\n"
-                f"Überfüllungsrate: {uebefuellungsrate} %\n"
-                f"Ausfall: {ausfall}\n"
-                f"Reguläreleerung: {regulaere_leerung_findet_statt}\n"
-                f"Sonderentleerung: {sonderentleerung}\n"
-                f"Kosten Woche: {woche_kosten:.2f} €\n"
-                f"Geleert: {geleert}\n"
-            )
-
+            self.ueberfuellung_kosten_woche.append(ueberfuellung_kosten)
+            self.kosten_woche.append(kosten)
 
             # Zeitfortschritt (1 Zeiteinheit = 1 Woche)
             yield self.env.timeout(1)
 
-# -------------------------------
-# ---------- Simulation ----------
-env = simpy.Environment()
-model = MuellentsorgungsSystem(env)
-env.run(until=WEEKS + 1)  # Beginnend bei 1 und nicht 0
+# # -------------------------------
+# # ---------- Simulation ----------
+
+
+def simulation_einzeln(seed):
+    random.seed(seed)
+    env = simpy.Environment()
+    model = MuellentsorgungsSystem(env)
+    env.run(until=WEEKS + 1)
+
+    #print(model.kosten_woche)
+
+    kosten = []
+    kosten = kosten.append(model.kosten_woche)
+
+    # Metriken
+    return {
+        "seed": seed,
+        "wochen": model.wochen,  # [1..WEEKS]
+        "kosten_woche": model.kosten_woche,
+        "bewohner_woche": model.bewohner_woche,
+        "besuch_woche": model.besuch_woche,
+        "rest_abfall_woche": model.rest_abfall_woche,
+        "rest_tonne_kapazitaet_woche": model.rest_tonne_kapazitaet_woche,
+        "rest_abfallmenge_gesamt_woche": model.rest_abfallmenge_gesamt_woche,
+        "ueberfuellungsrate_woche": model.ueberfuellungsrate_woche,
+        "ausfall_woche": model.ausfall_woche,
+        "sonderentleerung_kosten_woche": model.sonderentleerung_kosten_woche,
+        "ueberfuellung_kosten_woche": model.ueberfuellung_kosten_woche,
+    }
+
+def monte_carlo(durchlaeufe = 2000, seed_start = 123):
+    ergebnisse = []
+    for i in range(durchlaeufe):
+        ergebnisse.append(simulation_einzeln(seed=seed_start + i))
+    return ergebnisse
+
+
+def auswertung_gesamt(ergebnisse):
+    """
+    Berechnet Statistiken über ALLE Wochen UND ALLE Runs für alle Metriken,
+    die in simulation_einzeln zurückgegeben werden (außer 'seed' und 'wochen').
+    """
+
+    if not ergebnisse:
+        return {}
+
+    # Alle Keys bestimmen, die ausgewertet werden sollen
+    exclude = {"seed", "wochen"}
+    metriken = [k for k in ergebnisse[0].keys() if k not in exclude]
+
+    result = {}
+
+    for metrik in metriken:
+        alle_werte = []
+        for run in ergebnisse:
+            alle_werte.extend(run[metrik])
+
+        # Sonderfall: Bool-Metriken (z.B. ausfall_woche)
+        if alle_werte and isinstance(alle_werte[0], bool):
+            true_count = sum(alle_werte)
+            n = len(alle_werte)
+            result[metrik] = {
+                "quote_true": true_count / n,   # Anteil True
+                "anzahl_true": true_count,
+                "anzahl_werte": n,
+            }
+            continue
+
+        # Standard: numerische Metriken
+        result[metrik] = {
+            "mean": stats.mean(alle_werte),
+            "min": min(alle_werte),
+            "max": max(alle_werte),
+            "std": stats.stdev(alle_werte) if len(alle_werte) > 1 else 0.0,
+            "median": stats.median(alle_werte),
+            "anzahl_werte": len(alle_werte),
+        }
+
+    return result
+
+def print_stats_gesamt(stats_gesamt):
+    for metrik, werte in stats_gesamt.items():
+        print(f"\n{metrik} – gesamter Simulationslauf:")
+        for k, v in werte.items():
+            if isinstance(v, float):
+                print(f"  {k}: {v:.4f}" if "quote" in k else f"  {k}: {v:.2f}")
+            else:
+                print(f"  {k}: {v}")
+
+ergebnisse = monte_carlo(durchlaeufe=2000)
+stats_gesamt = auswertung_gesamt(ergebnisse)
+print_stats_gesamt(stats_gesamt)
+
+
+
+
+
+# def plot_histogramme_gesamt(ergebnisse: list[dict], bins="auto", save_dir: str | None = None):
+
+#     if not ergebnisse:
+#         print("Keine Ergebnisse vorhanden.")
+#         return
+
+#     exclude = {"seed", "wochen"}
+#     metriken = [k for k in ergebnisse[0].keys() if k not in exclude]
+
+#     if save_dir is not None:
+#         os.makedirs(save_dir, exist_ok=True)
+
+#     for metrik in metriken:
+#         # Werte über alle Runs/Wochen flach sammeln
+#         alle_werte = []
+#         for run in ergebnisse:
+#             alle_werte.extend(run[metrik])
+
+#         if not alle_werte:
+#             continue
+
+#         plt.figure()
+
+#         # Bool-Metrik: Balken statt Histogramm
+#         if isinstance(alle_werte[0], bool):
+#             true_count = sum(alle_werte)
+#             false_count = len(alle_werte) - true_count
+#             plt.bar(["False", "True"], [false_count, true_count])
+#             plt.title(f"{metrik} – Häufigkeit (gesamt)")
+#             plt.ylabel("Anzahl")
+#         else:
+#             plt.hist(alle_werte, bins=bins)
+#             plt.title(f"{metrik} – Histogramm (gesamt)")
+#             plt.xlabel(metrik)
+#             plt.ylabel("Häufigkeit")
+
+#         plt.tight_layout()
+
+#         if save_dir is not None:
+#             # Dateiname „sauber“ machen
+#             fname = "".join(ch if ch.isalnum() or ch in ("_", "-", ".") else "_" for ch in metrik)
+#             path = os.path.join(save_dir, f"hist_{fname}.png")
+#             plt.savefig(path, dpi=150)
+#             plt.close()
+#         else:
+#             plt.show()
+
+# plot_histogramme_gesamt(ergebnisse, bins="auto")
+
+
