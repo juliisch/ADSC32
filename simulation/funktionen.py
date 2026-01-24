@@ -18,8 +18,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 from datetime import date, timedelta
+import matplotlib.image as mpimg
+from pathlib import Path
 # Globale Paramter importieren
-from parameter import TAGE, START_JAHR, MIN_BEWOHNER, MAX_BEWOHNER,  DEFAULT_RESTMUELL_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_UEBERFUELLUNGSPROZENT, SONDERENTLEERUNG_KOSTEN
+from parameter import TAGE, START_JAHR,  P_ABWESEND, DEFAULT_RESTMUELL_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_UEBERFUELLUNGSPROZENT
 
 
 """
@@ -27,6 +29,8 @@ Funktion:           Bestimmung der Kosten bei Überfüllung
 Input:              ueber_liter (Überfüllungsmenge in Liter)
 Output:             kosten_sonderentleerung (berechnete Sonderkosten)
 Funktionsweise:     Bei einer Überfüllung wird pro 70 Liter der Überfüllmenge 9 EUR berechnet.
+
+# Quelle: Abfallwirtschaftsbetrieb München. Tonnen für Privathaushalte. Abgerufen am 12.01.2026 von https://www.awm-muenchen.de/abfall-entsorgen/muelltonnen/fuer-haushalte
 """
 def sonderkosten_aus_ueberfuellung(ueber_liter):
     kosten_sonderentleerung = math.ceil(ueber_liter / 70) * 9 if ueber_liter > 0 else 0
@@ -153,6 +157,31 @@ def summary_to_dataframe(results_summary):
         values="Wert",
     )
 
+
+
+def gerniere_subplot(metrik_name):
+
+    zustande = ["Normal", "Besuch", "Ausfall"]
+    massnahmen = ["Keine Sondermaßnahmen","Kapazitaetsausbau", "Sonderentleerung"]
+
+    fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(20, 10))
+
+    for i, zustand in enumerate(zustande):
+        for j, massnahme in enumerate(massnahmen):
+            ax = axes[i, j]
+
+            img_path =  f"output/histogramm_{metrik_name}_{zustand}_{massnahme}.png"
+
+            img = mpimg.imread(img_path)
+            ax.imshow(img)
+            ax.axis("off")
+
+            # Titel für Spalten
+            if i == 0:
+                ax.set_title(massnahme, fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join("output",f"histogramm_{metrik_name}.png"))
 
 # --------------------------
 # ---------- Ende ----------

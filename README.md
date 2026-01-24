@@ -1,5 +1,15 @@
 # ADSC32
-ADSC32 Applied Data Science III: Softwareparadigmen (Exam performance)
+
+Dieses Repository enthält den Code-Teil der Studienarbeit für das Modul ADSC32 Applied Data Science III: Softwareparadigmen (Exam performance). 
+
+Der Ordner `simulation` umfasst sämtliche Python-Dateien, die zur Ausführung und Steuerung der Simulation benötigt werden:
+- `funktionen.py`: Enthält alle definierten Hilfsfunktionen, welche innerhalb der Simulation verwendet werden.
+- `main.py`: Startdatei zur Ausführung der gesamten Simulation.
+- `parameter.py`: In dieser Datei werden die zugrundeliegenden globalen Paramter definiert.
+- `simulation.py`: Diese Datei beinhaltet die gesamte Simulationslogik. 
+
+Die in der Simulation generierten Grafiken sowie die Ergebnistabelle im CSV-Format werden im Ordner `output`  gespeichert.
+
 
 ### Installation
 
@@ -24,4 +34,4 @@ ADSC32 Applied Data Science III: Softwareparadigmen (Exam performance)
 
 2. **Führen Sie das Notebook aus**
 
-    Führen Sie die Datei `main.py` aus.
+    Führen Sie die Datei `simulation/main.py` aus.

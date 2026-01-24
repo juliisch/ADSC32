@@ -6,7 +6,7 @@ Prof. Dr. Marcel Hebing
 Julia Schmid (200022)
 
 
-In dieser Datei steht die Simulationslogik.
+Diese Datei beinhaltet die Simulationslogik.
 """
 
 # -----------------------------
@@ -15,7 +15,7 @@ import random
 import simpy
 
 # Globale Paramter importieren
-from parameter import TAGE, START_JAHR, MIN_BEWOHNER, MAX_BEWOHNER,  DEFAULT_RESTMUELL_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_UEBERFUELLUNGSPROZENT, SONDERENTLEERUNG_KOSTEN
+from parameter import TAGE, START_JAHR, ANZAHL_BEWOHNER,  P_ABWESEND, DEFAULT_RESTMUELL_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_UEBERFUELLUNGSPROZENT
 
 # Importiere alle Hilfsfunktionen
 from funktionen import *
@@ -32,7 +32,8 @@ Funktionsweise:
 def simulation_einzeln(seed, szenario, handlungsoption):
     env = simpy.Environment()
     model = MuellentsorgungsSystem(env, szenario, handlungsoption, seed)
-    env.run(until=TAGE)
+    #env.run(until=TAGE)
+    env.run(until=TAGE) 
     return {
         "kosten_tag": model.kosten_tag,
         "anzahl_bewohner_tag": model.anzahl_bewohner_tag, 
@@ -114,15 +115,20 @@ class MuellentsorgungsSystem:
 
     # Prozess: Müllzufuhr der Bewohner ---
     def muellproduktion(self):
-        for tag in range(TAGE):
+        #for tag in range(TAGE):
+        while True:
+            tag = int(self.env.now)
             # Müll der Bewohner (Szenario: Normal)
-            anzahl_bewohner = self.rng.randint(MIN_BEWOHNER, MAX_BEWOHNER)
+            anzahl_bewohner = ANZAHL_BEWOHNER 
+            # Mit eines Wahrscheinlichkeit sind die Bewohner aus dem Haus
+            if self.rng.random() < P_ABWESEND:
+                anzahl_bewohner = self.rng.randint(0, anzahl_bewohner)
             self.fuellstand += anzahl_bewohner * DEFAULT_RESTMUELL_PRO_PERSON_TAG
 
             # Müll der Gäste (Szenario: Besuch)
             if self.rng.random() < self.szenario["P_BESUCH"]: 
-                anzahl_gaeste = self.rng.randint(1, self.szenario["MAX_GAESTE"])
-                self.fuellstand += anzahl_gaeste * DEFAULT_RESTMUELL_PRO_PERSON_TAG * 0.15 # Müllmenge der Gäste 
+                anzahl_gaeste = self.rng.randint(1, 10) # Besucheranzahl zwischen 1 und 10
+                self.fuellstand += anzahl_gaeste * DEFAULT_RESTMUELL_PRO_PERSON_TAG * 0.15 # Müllmenge der Gäste entspricht 15 Prozent des reguläten Müllaufkommen pro Person
                 self.anzahl_besuch_tag.append(anzahl_gaeste)
 
             # Metriken
@@ -134,24 +140,26 @@ class MuellentsorgungsSystem:
             # Zeitfortschritt (1 Zeiteinheit = 1 Tag)
             yield self.env.timeout(1)
     
-    # Prozess: ueberfuellung
+    # Prozess: Überfuellung
     def ueberfuellung(self):
         for tag in range(TAGE):
             tag_datum = date(START_JAHR, 1, 1) + timedelta(days=tag)
 
             # Wenn Tag auf Leertag fällt, Tag keine Feiertag ist und an dem Tag kein Ausfall stattfindet (Szenario: Ausfall) wird geleert --> Überfüllungskosten/Kapazitaetsausbau (Handlungsoption: Kapazitaetsausbau) findet statt
-            if tag % 7 == self.leertag and tag_datum not in self.feiertage and self.rng.random() > self.szenario["P_AUSFALL"]:
+            if tag % 14 == self.leertag and tag_datum not in self.feiertage and self.rng.random() > self.szenario["P_AUSFALL"]:
 
                 # Überfüllungskosten
                 ueber_liter = max(0, self.fuellstand - self.kapazitaet) # Überfüllungsmenge in Liter
                 kosten_ueberfuellung = sonderkosten_aus_ueberfuellung(ueber_liter) # Überfüllungskosten
                 # Metriken
                 self.ueberfuellung_kosten_tag.append(kosten_ueberfuellung) # Kosten bei Überfüllung 
+                
+                ueberrate = ueberfuellungsrate(self.fuellstand, self.kapazitaet)
 
 
 
                 # Anzahl der Überfülllungen 
-                if ueber_liter > 0:
+                if ueberrate >= 100:
                     self.wochen_ueberfuellt += 1
                 else:
                     self.wochen_ueberfuellt = 0
@@ -179,12 +187,14 @@ class MuellentsorgungsSystem:
 
     # Prozess: Leerung (regulaer) (Szenario: Normal/Ausfall)
     def leerung_regulaere(self):
-        for tag in range(TAGE):
+        #for tag in range(TAGE):
+        while True:
+            tag = int(self.env.now)
             # Bestimmung des Datums des aktuellen Tages (Für Feiertag)
             tag_datum = date(START_JAHR, 1, 1) + timedelta(days=tag)
             # Wenn Tag auf Leertag fällt, Tag keine Feiertag ist und an dem Tag kein Ausfall stattfindet (Szenario: Ausfall) wird geleert 
             ist_ausfall = False
-            if tag % 7 == self.leertag and tag_datum not in self.feiertage:
+            if tag % 14 == self.leertag and tag_datum not in self.feiertage:
                 if self.rng.random() <= self.szenario["P_AUSFALL"]:
                     ist_ausfall = True
                 else:
@@ -197,13 +207,15 @@ class MuellentsorgungsSystem:
 
     # Prozess: Sonderentleerung (Handlungsoption: Sonderentleerung)
     def leerung_sonder(self):
-        for tag in range(TAGE):
+        #for tag in range(TAGE):
+        while True:
             kosten_sonderentleerung = 0
             # Wenn die Handlungsoption Sonderentleerung in der Simulation betrachtet wird, und der Schwellenwert für die Sonderentleerung erreicht ist, findet eine Sonderentleerung statt
             if (self.handlungsoption["sonderentleerung"] and ueberfuellungsrate(self.fuellstand, self.kapazitaet)>= SONDERENTLEERUNG_UEBERFUELLUNGSPROZENT):
                 self.fuellstand = 0 # Tonne wird geleert --> Füllstand wird zurückgesetzt, auf 0 
-                kosten_sonderentleerung = SONDERENTLEERUNG_KOSTEN # Sonderkosten werden gespeichert
-            
+                
+                kosten_sonderentleerung = REST_MUELLTONE_KOSTEN_STAFFEL[self.kapazitaet] * 1.1 # Sonderkosten liegen 10 Prozent über den normal Kosten
+
             # Metriken
             self.sonderentleerung_kosten_tag.append(kosten_sonderentleerung) #  Kosten für die Sonderentleerung
 
