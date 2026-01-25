@@ -44,7 +44,7 @@ def simulation_einzeln(seed, szenario, handlungsoption):
         "kosten_tag": model.kosten_tag,
         "anzahl_bewohner_tag": model.anzahl_bewohner_tag, 
         "anzahl_besuch_tag": model.anzahl_besuch_tag,
-        "fuellmenge_tag": model.fuellmenge_tag,
+        "muellmenge_tag": model.muellmenge_tag,
         "kapazitaet_tag": model.kapazitaet_tag,
         "ueberfuellungsrate_tag": model.ueberfuellungsrate_tag,
         "sonderentleerung_kosten_tag": model.sonderentleerung_kosten_tag,
@@ -131,7 +131,7 @@ class MuellentsorgungsSystem:
         self.anzahl_bewohner_tag = [] # Anzahl der Bewohner
         self.anzahl_besuch_tag = [] # Anzahl der Besucher
         self.ausfall_tag = [] # Indikator ob Ausfall stattgefunden hat
-        self.fuellmenge_tag = [] # Füllmenge der Tonne
+        self.muellmenge_tag = [] # Füllmenge der Tonne
         self.kapazitaet_tag = [] # Kapazität der Tonne
         self.ueberfuellungsrate_tag = [] # Überfüllungsrate
         self.sonderentleerung_kosten_tag = [] # Kosten für die Sonderentleerung
@@ -163,7 +163,7 @@ class MuellentsorgungsSystem:
 
             # Metriken
             self.anzahl_bewohner_tag.append(anzahl_bewohner)
-            self.fuellmenge_tag.append(self.fuellstand) # Füllmenge der Tonne 
+            self.muellmenge_tag.append(self.fuellstand) # Füllmenge der Tonne 
             self.kapazitaet_tag.append(self.kapazitaet) # Kapazität der Tonne
             self.ueberfuellungsrate_tag.append(ueberfuellungsrate(self.fuellstand, self.kapazitaet)) # Überfüllungsrate
 

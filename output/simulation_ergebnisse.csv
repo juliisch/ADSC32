@@ -1,37 +1,29 @@
 Szenario,,Ausfall,Ausfall,Ausfall,Besuch,Besuch,Besuch,Normal,Normal,Normal
-Handlungsoption,,Kapazitaetsausbau,Keine Sondermaßnahmen,Sonderentleerung,Kapazitaetsausbau,Keine Sondermaßnahmen,Sonderentleerung,Kapazitaetsausbau,Keine Sondermaßnahmen,Sonderentleerung
+Handlungsoption,,Kapazitaetsausbau,Sonderentleerung,feste Abholintervalle,Kapazitaetsausbau,Sonderentleerung,feste Abholintervalle,Kapazitaetsausbau,Sonderentleerung,feste Abholintervalle
 Metrik,Kennzahl,,,,,,,,,
-anzahl_besuch_tag,Durchchschnitt,5.497,5.497,5.497,5.503,5.503,5.503,5.497,5.497,5.497
-anzahl_besuch_tag,Max-Wert,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0
-anzahl_besuch_tag,Min-Wert,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
-anzahl_besuch_tag,Standard Abweichung,2.88,2.88,2.88,2.878,2.878,2.878,2.88,2.88,2.88
-anzahl_bewohner_tag,Durchchschnitt,17.551,17.551,17.551,17.554,17.554,17.554,17.551,17.551,17.551
-anzahl_bewohner_tag,Max-Wert,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0
-anzahl_bewohner_tag,Min-Wert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-anzahl_bewohner_tag,Standard Abweichung,2.307,2.307,2.307,2.299,2.299,2.299,2.307,2.307,2.307
-ausfall_tag,Anzahl Ausfälle,360.0,360.0,360.0,175.0,175.0,175.0,180.0,180.0,180.0
-ausfall_tag,Quote,0.072,0.072,0.072,0.035,0.035,0.035,0.036,0.036,0.036
-fuellmenge_tag,Durchchschnitt,576.688,576.688,116.028,573.975,573.975,116.524,571.502,571.502,116.025
-fuellmenge_tag,Max-Wert,3195.0,3195.0,226.929,2233.286,2233.286,227.143,3188.786,3188.786,226.929
-fuellmenge_tag,Min-Wert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-fuellmenge_tag,Standard Abweichung,327.043,327.043,41.755,319.575,319.575,41.941,318.47,318.47,41.753
-kapazitaet_tag,Durchchschnitt,672.03,80.0,80.0,672.906,80.0,80.0,672.605,80.0,80.0
-kapazitaet_tag,Max-Wert,1100.0,80.0,80.0,770.0,80.0,80.0,1100.0,80.0,80.0
-kapazitaet_tag,Min-Wert,80.0,80.0,80.0,80.0,80.0,80.0,80.0,80.0,80.0
-kapazitaet_tag,Standard Abweichung,227.617,0.0,0.0,226.562,0.0,0.0,227.046,0.0,0.0
-kosten_tag,Durchchschnitt,4.103,9.294,0.911,4.097,9.313,0.927,4.072,9.296,0.917
-kosten_tag,Max-Wert,389.807,405.489,27.489,279.634,279.489,27.489,388.05,405.489,27.489
-kosten_tag,Min-Wert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-kosten_tag,Standard Abweichung,17.111,34.115,3.875,16.889,33.994,3.896,16.791,33.932,3.887
-sonderentleerung_kosten_tag,Durchchschnitt,0.0,0.0,0.227,0.0,0.0,0.227,0.0,0.0,0.227
-sonderentleerung_kosten_tag,Max-Wert,0.0,0.0,0.537,0.0,0.0,0.537,0.0,0.0,0.537
-sonderentleerung_kosten_tag,Min-Wert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-sonderentleerung_kosten_tag,Standard Abweichung,0.0,0.0,0.265,0.0,0.0,0.265,0.0,0.0,0.265
-ueberfuellung_kosten_tag,Durchchschnitt,3.925,9.259,0.864,3.918,9.278,0.879,3.893,9.261,0.87
-ueberfuellung_kosten_tag,Max-Wert,387.0,405.0,27.0,279.0,279.0,27.0,387.0,405.0,27.0
-ueberfuellung_kosten_tag,Min-Wert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-ueberfuellung_kosten_tag,Standard Abweichung,16.623,33.991,3.766,16.396,33.87,3.784,16.298,33.808,3.777
-ueberfuellungsrate_tag,Durchchschnitt,62.151,621.23,47.552,61.203,617.826,48.034,60.873,614.749,47.548
-ueberfuellungsrate_tag,Max-Wert,2615.268,3893.75,183.661,2649.821,2691.607,183.929,1733.929,3885.982,183.661
-ueberfuellungsrate_tag,Min-Wert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-ueberfuellungsrate_tag,Standard Abweichung,179.513,408.225,49.019,178.782,398.899,49.378,177.308,397.496,49.019
+anzahl_besuch,Durchchschnitt,5.527,5.527,5.527,5.479,5.479,5.479,5.527,5.527,5.527
+anzahl_besuch,Maximalwert,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0
+anzahl_besuch,Minimalwert,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+anzahl_bewohner,Durchchschnitt,17.544,17.544,17.544,17.548,17.548,17.548,17.544,17.544,17.544
+anzahl_bewohner,Maximalwert,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0
+anzahl_bewohner,Minimalwert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+ausfall,Anzahl Ausfälle,487.0,487.0,487.0,294.0,294.0,294.0,268.0,268.0,268.0
+ausfall,Quote,0.097,0.097,0.097,0.059,0.059,0.059,0.054,0.054,0.054
+kapazitaet,Durchchschnitt,618.536,80.0,80.0,619.152,80.0,80.0,619.192,80.0,80.0
+kapazitaet,Maximalwert,1100.0,80.0,80.0,770.0,80.0,80.0,770.0,80.0,80.0
+kapazitaet,Minimalwert,80.0,80.0,80.0,80.0,80.0,80.0,80.0,80.0,80.0
+kosten,Durchchschnitt,6.669,1.687,9.688,6.674,1.704,9.71,6.646,1.698,9.689
+kosten,Maximalwert,495.48,33.84,537.84,392.7,33.84,411.84,392.7,33.84,411.84
+kosten,Minimalwert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+muellmenge,Durchchschnitt,574.196,114.82,574.196,570.232,115.109,570.232,567.636,114.814,567.636
+muellmenge,Maximalwert,4194.429,227.143,4194.429,3166.929,226.5,3166.929,3177.857,227.143,3177.857
+muellmenge,Minimalwert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+sonderentleerung_kosten,Durchchschnitt,0.0,6.928,0.0,0.0,6.924,0.0,0.0,6.921,0.0
+sonderentleerung_kosten,Maximalwert,0.0,16.416,0.0,0.0,16.416,0.0,0.0,16.416,0.0
+sonderentleerung_kosten,Minimalwert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+ueberfuellung_kosten,Durchchschnitt,4.364,0.823,9.202,4.352,0.84,9.222,4.325,0.829,9.201
+ueberfuellung_kosten,Maximalwert,441.0,27.0,531.0,378.0,27.0,405.0,378.0,27.0,405.0
+ueberfuellung_kosten,Minimalwert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+ueberfuellungsrate,Durchchschnitt,94.406,46.405,618.172,92.808,46.68,613.194,92.308,46.398,609.974
+ueberfuellungsrate,Maximalwert,2616.875,183.929,5143.036,2629.732,183.125,3858.661,2616.875,183.929,3872.321
+ueberfuellungsrate,Minimalwert,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0

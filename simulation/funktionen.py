@@ -96,10 +96,14 @@ def berechnung_statistiken(ergebnisse):
     metriken = [k for k in ergebnisse[0].keys()] 
 
     for metrik in metriken:
+        
+
         # Zusammenführung der Werte zu einer gesamten Liste
         werte = []
         for ergebnis in ergebnisse:
             werte.extend(ergebnis[metrik])
+
+        metrik = metrik.removesuffix("_tag") # Suffix entfernen (für schönere Ausgabe)
 
         # Boolean Metrik (ausfall_tag)
         if werte and isinstance(werte[0], bool):
@@ -125,13 +129,13 @@ Funktion:           Erstellung von Histogrammen für die Metriken Gesamtkosten u
 Input:              ergebnisse (Simulationsergebnisse)
                     szenario_name (Szenarioname)
                     handlungsoption_name (Handlungsoptionsname)
-Funktionsweise:     Für die beiden Metriken kosten_tag (Gesamtkosten) und fuellmenge_tag (Gesamtmüllmenge) werden die gesamten Simulationswerte aggregiert.
+Funktionsweise:     Für die beiden Metriken kosten_tag (Gesamtkosten) und muellmenge_tag (Gesamtmüllmenge) werden die gesamten Simulationswerte aggregiert.
                     Für jede Metrik wird ein Histogramm erzeugt und als PNG-Datei gespeichert
 """
 def grafik_histogramme(ergebnisse, szenario_name, handlungsoption_name):
     # Aggregation der Werte
     gesamtkosten = [sum(ergebnis["kosten_tag"]) for ergebnis in ergebnisse]  #Gesamtkosten
-    gesamtmuell = [sum(ergebnis["fuellmenge_tag"]) for ergebnis in ergebnisse] # Gesamtmüllmenge
+    gesamtmuell = [sum(ergebnis["muellmenge_tag"]) for ergebnis in ergebnisse] # Gesamtmüllmenge
 
     list_plot_info = [
         (gesamtkosten, "Gesamtkosten", "EUR", "gesamtkosten"),

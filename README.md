@@ -32,6 +32,13 @@ Die in der Simulation generierten Grafiken sowie die Ergebnistabelle im CSV-Form
 
     Nach der Installation der Bibliotheken ist es erforderlich, das Programm neu zu starten, damit diese wirksam werden.
 
-2. **Führen Sie das Notebook aus**
+2. **Führen Sie das Simulation aus**
 
-    Führen Sie die Datei `simulation/main.py` aus.
+    Führen Sie die Datei `simulation/main.py` aus. 
+
+    Alternativ kann auch der folgende Shell Befehlt ausgeführt werden:
+
+    ```bash
+    python simulation/main.py
+    ```
+
