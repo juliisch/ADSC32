@@ -5,8 +5,7 @@ ADSC32 Applied Data Science III: Softwareparadigmen
 Prof. Dr. Marcel Hebing
 Julia Schmid (200022)
 
-
-In dieser Datei wird der Start der Simulation ausgeführt. Zur Ausführung muss die Datei ausgeführt werden.
+Diese Datei beinhaltet den Simulationsstart. Zum Starten der Simulation muss die Datei ausgeführt werden.
 """
 
 # -----------------------------
@@ -46,16 +45,16 @@ ANZAHL_DURCHLAEUFE = 1000 # Anzahl der Simulationsdurchläufe
 
 
 if __name__ == "__main__": 
-    os.makedirs("../output", exist_ok=True) # Output-Ordner anlegen (falls nicht schon vorhanden ist)
+    os.makedirs("../output", exist_ok=True) # Output-Ordner anlegen (falls nicht schon vorhanden ist) zur Speicherung der Ergebniss Dateien (Bilder, CSV)
     print("[Info] Simulation gestartet.")
     # Simulation
     summary = simulationslauf(SZENARIEN, HANDLUNGSOPTIONEN, ANZAHL_DURCHLAEUFE) 
     # Simulationsergebnisse
     df_results = ausgabe_csv(summary) 
-    df_results.to_csv("output/simulation_ergebnisse.csv")
+    df_results.to_csv("output/simulation_ergebnisse.csv") # Speicherung der Ergebnistabelle als CSV.
     print("[Info] Simulation beendet.")
 
-    # Die einzelnen Plots werden in einem 3x3 Plot gespeichert
+    # Die einzelnen Plots der Gesamtkosten und des Gesamtmülls werden in einem 3x3 Plot gespeichert
     gerniere_subplot("gesamtkosten")
     gerniere_subplot("gesamtmuell")
 

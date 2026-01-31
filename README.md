@@ -22,7 +22,23 @@ Die in der Simulation generierten Grafiken sowie die Ergebnistabelle im CSV-Form
     cd ADSC32
     ```
 
-2. **Bibliotheken installieren**
+
+2. **Setze eine virtuelle Umgebung auf**
+    ```bash
+    python3 -m venv adsc_env
+    ```
+    ```bash
+    source adsc_env/bin/activate
+    ```
+    ```bash
+    pip install ipykernel
+    ```
+
+    ```bash
+    python -m ipykernel install --user --name=adsc_env --display-name "Python (adsc_env)"
+    ```
+
+3. **Bibliotheken installieren**
 
     Installieren Sie die benötigten Bibliotheken über die Datei `requirements.txt`.
 
@@ -32,7 +48,7 @@ Die in der Simulation generierten Grafiken sowie die Ergebnistabelle im CSV-Form
 
     Nach der Installation der Bibliotheken ist es erforderlich, das Programm neu zu starten, damit diese wirksam werden.
 
-2. **Führen Sie das Simulation aus**
+4. **Führen Sie das Simulation aus**
 
     Führen Sie die Datei `simulation/main.py` aus. 
 

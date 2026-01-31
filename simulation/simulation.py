@@ -13,10 +13,8 @@ Diese Datei beinhaltet die Simulationslogik.
 # ---------- Imports ----------
 import random
 import simpy
-
 # Globale Paramter importieren
 from parameter import TAGE, START_JAHR, ANZAHL_BEWOHNER,  P_ABWESEND, DEFAULT_RESTMUELL_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_FUELLMENGE_PROZENT
-
 # Importiere alle Hilfsfunktionen
 from funktionen import *
 
@@ -32,7 +30,7 @@ Output:         simulation_ergebnisse_metrik (Werte der erfassten Metriken)
 Funktionsweise: Zunächst wird eine SimPy-Umgebung initialisiert.
                 Anschließend wird das Müllentsorgungssystem-Modell erzeugt. 
                 Weiter wird die Simulation über den gesamten Betrachtungszeitraum ausgeführt.
-                Die erfassten Metriken werden im Dic. gemessen und zurückgegeben.
+                Die erfassten Metriken werden im Dic. gespeichert und zurückgegeben.
 """
 def simulation_einzeln(seed, szenario, handlungsoption):
     env = simpy.Environment() # Initialisierung der SimPy-Umgebung
@@ -105,9 +103,9 @@ Jeden Tag wird Müll durch die Bewohner und ggf. den Gästen erzeugt. Die Anzahl
 Der Müll wird in die Mülltonne geschmissen (Füllstand hinzugefügt).
 Der Leertag der Mülltage wird zu Beginn der Simulation per Zufall gefällt.
 Alle 14 Tage erfolgt eine reguläre Leerung, solange der Leertag nicht auf einen Feiertag oder Ausfalltag fällt.
-Kommt es zu einer Überfüllung (Müllmenge > Kapazität), so entstehen Überfüllungs-zusatzkosten.
+Kommt es zu einer Überfüllung (Müllmenge > Kapazität), so entstehen Überfüllungszusatzkosten.
 Bei mehrfacher Überfüllung kann (wenn die Kapazitäten es hergeben) die Tonnenkapazität erhöht werden. 
-Im der Handlungsoption Sonderentleerung wird beim Erreichen eines bestimmten Füllstands die Leerung ausgelöst. Diese verusacht zusätzliche Kosten.
+Bei der Handlungsoption Sonderentleerung wird beim Erreichen eines bestimmten Füllstands die Leerung ausgelöst. Diese verusacht zusätzliche Kosten.
 """
 class MuellentsorgungsSystem:
     def __init__(self, env, szenario, handlungsoption, seed):
@@ -173,6 +171,7 @@ class MuellentsorgungsSystem:
     # Prozess: Überfuellung ---
     def ueberfuellung(self):
         for tag in range(TAGE):
+            # Bestimmung des Datums des aktuellen Tages (Für Feiertag)
             tag_datum = date(START_JAHR, 1, 1) + timedelta(days=tag)
 
             # Wenn Tag auf Leertag fällt, Tag keine Feiertag ist und an dem Tag kein Ausfall stattfindet (Szenario: Ausfall) wird geleert --> Überfüllungskosten/Kapazitaetsausbau (Handlungsoption: Kapazitaetsausbau) findet statt
@@ -187,14 +186,13 @@ class MuellentsorgungsSystem:
                 ueberrate = ueberfuellungsrate(self.fuellstand, self.kapazitaet)
 
 
-
                 # Anzahl der Überfülllungen 
                 if ueberrate >= 100:
                     self.wochen_ueberfuellt += 1
                 else:
                     self.wochen_ueberfuellt = 0
 
-                # Wenn die Handlungsoption Kapazitaetsausbau in der Simulation betrachtet wird und in zwei aufeianderfolgendne Woche es zu einer Überfüllung kam, wird die Kapazität erweitert.
+                # Wenn die Handlungsoption Kapazitaetsausbau in der Simulation betrachtet wird und in drei aufeianderfolgendne Woche es zu einer Überfüllung kam, wird die Kapazität erweitert.
                 if self.handlungsoption["kapazitaetsausbau"] and self.wochen_ueberfuellt >= 3:
                     # Bestimmung der möglichen Kapazitätsgrößen
                     potenzielle_tonnen_kapa = [kapa for kapa in REST_MUELLTONE_STAFFEL if kapa > self.kapazitaet]
@@ -243,7 +241,7 @@ class MuellentsorgungsSystem:
                 self.fuellstand = 0 # Tonne wird geleert --> Füllstand wird zurückgesetzt, auf 0 
                 
                 kosten_sonderentleerung = REST_MUELLTONE_KOSTEN_STAFFEL[self.kapazitaet] * 2.4 # Sonderkosten liegen 240 Prozent über den normal Kosten
-                # Quelle: Abfallwirtschaft Hohenlohekreis. Qualit¨atsoffensive. Abgerufen am 25.01.2026 von https://www.abfallwirtschaft-hohenlohekreis.de/leistungen-gebhren/qualittsoffensive
+                # Quelle: Abfallwirtschaft Hohenlohekreis. Qualitätsoffensive. Abgerufen am 25.01.2026 von https://www.abfallwirtschaft-hohenlohekreis.de/leistungen-gebhren/qualittsoffensive
 
             # Metriken
             self.sonderentleerung_kosten_tag.append(kosten_sonderentleerung) #  Kosten für die Sonderentleerung

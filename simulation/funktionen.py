@@ -6,7 +6,7 @@ Prof. Dr. Marcel Hebing
 Julia Schmid (200022)
 
 
-In dieser Datei werden die Hilfunktionen definiert. 
+In dieser Datei sind die Hilfunktionen definiert. 
 """
 
 # -----------------------------
@@ -39,7 +39,7 @@ def sonderkosten_aus_ueberfuellung(ueber_liter):
 
 
 """
-Funktion:           Berechnet die Überfüllungsrate der Restmülltonne in Prozent.
+Funktion:           Berechnet die Überfüllungsrate der Restmülltonne in Prozent
 Input:              fuellstand (Füllstand der Restmülltonne in Litern)
                     kapazitaet (Kapazität der Restmülltonne in Litern)
 Output:             rate (Überfüllungsrate in Prozent)
@@ -60,7 +60,8 @@ Input:              leertag (Wochentag, an dem die Müll geleert wird)
                     start_jahr (das Jahr in dem die Simulation beginnt)
 Output:             leertag_feiertage (Liste der Feiertage, auf denen der Leertag fällt)
 Funktionsweise:     Abhängig von der betrachteten Tage, wird der betrachtete Zeitraum bestimmt.
-                    Für jedes betrachtete Jahr werden die Feiertage bestimmt. Es wird angenommen, dass das Wohnhaus in München, Bayern steht. 
+                    Für jedes betrachtete Jahr werden die Feiertage bestimmt. 
+                    Es wird angenommen, dass das Wohnhaus in München, Bayern steht. 
                     Dadurch gelten die bayerischen Feiertage.
                     Für jeden Tag wird geprüft, ob dieser auf den Leertag fällt und es sich um einen Feiertag fällt. 
                     Jene Tage, für welche beiden Bedingungen erfüllt sind, wird das Datum in die Ausgabeliste hinzugefügt.
@@ -103,7 +104,7 @@ def berechnung_statistiken(ergebnisse):
         for ergebnis in ergebnisse:
             werte.extend(ergebnis[metrik])
 
-        metrik = metrik.removesuffix("_tag") # Suffix entfernen (für schönere Ausgabe)
+        metrik = metrik.removesuffix("_tag") # Suffix entfernen (für eine schönere Ausgabe)
 
         # Boolean Metrik (ausfall_tag)
         if werte and isinstance(werte[0], bool):
@@ -125,7 +126,7 @@ def berechnung_statistiken(ergebnisse):
 
 
 """
-Funktion:           Erstellung von Histogrammen für die Metriken Gesamtkosten und Gesamtmüllmenge
+Funktion:           Erstellung eines Histogramms für die Metriken Gesamtkosten und Gesamtmüllmenge
 Input:              ergebnisse (Simulationsergebnisse)
                     szenario_name (Szenarioname)
                     handlungsoption_name (Handlungsoptionsname)
@@ -155,7 +156,7 @@ def grafik_histogramme(ergebnisse, szenario_name, handlungsoption_name):
 
 
 """
-Funktion:           Die Simulationsergebnisse werden in einem DataFrame formartiert und als CSV-Datei gespeichert.
+Funktion:           Die Simulationsergebnisse werden in einem DataFrame formartiert.
 Input:              results_summary (zusammengefasste Simulationsergebnisse)
 Output:             df_out (tabellarische Simulationsergebnisse)
 Funktionsweise:     Die Ergebnisstruktur wird in eine flache Struktur überführt.
@@ -183,7 +184,7 @@ def ausgabe_csv(results_summary):
 """
 Funktion:           Zusammenführung der einzelnen Histogramme zu einer Gesamtgrafik
 Input:              metrik_name (Name der Metrik)
-Funktionsweise:     Für alle erzeugten Grafiken werden die Kombinationen aus Szenarien und Handlungsoptionen der jeweiligen Metrik geladen und in einer 3×3-Subplot-Grafik zusammengeführt und gespeichert
+Funktionsweise:     Für alle erzeugten Grafiken der Gesamtkosten und Gesamtmüllmenge werden die Kombinationen aus Szenarien und Handlungsoptionen pro Metrik geladen und in einer 3×3-Subplot-Grafik zusammengeführt und gespeichert.
 """
 def gerniere_subplot(metrik_name):
 

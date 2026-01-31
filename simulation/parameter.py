@@ -6,13 +6,13 @@ Prof. Dr. Marcel Hebing
 Julia Schmid (200022)
 
 
-In dieser Datei werden die globalen Paramter definiert. 
+In dieser Datei sind die globalen Paramter definiert. 
 """
 
-TAGE = 500  # Anzahl der Tage, die in der Simulation betrachtet werden
+TAGE = 500  # Anzahl der Tage, die pro Simulationslauf betrachtet werden
 START_JAHR = 2026 # Startjahr der Simulation --> Feiertage sind davon abhängig
 
-# Haus mit 6 Wohnungen und insgesamt 18 Bewohner und Bewohnerinnen
+# Haus mit 18 Bewohner und Bewohnerinnen
 ANZAHL_BEWOHNER = 18
 P_ABWESEND = 0.05 # Wahrscheinlichkeit, dass ein Bewohner oder Bewohnerin nicht im Haus ist
 
@@ -25,7 +25,7 @@ DEFAULT_RESTMUELL_PRO_PERSON_TAG = 30/7  # Liter/Tag und Person
 # Verfügbare Tonnenkapazitäten (in Liter) und Tonnenkosten pro Tag
 # Quelle: Abfallwirtschaftsbetrieb München. Tonnen für Privathaushalte. Abgerufen am 12.01.2026 von https://www.awm-muenchen.de/abfall-entsorgen/muelltonnen/fuer-haushalte
 REST_MUELLTONE_STAFFEL = [80, 120, 240, 770, 1100] # Liste der verschiedenen Mülltonnenkapazitaeten
-REST_MUELLTONE_KOSTEN_STAFFEL = { # Kosten für die Entleerung alle zwei Wochen pro Tonnengröße 
+REST_MUELLTONE_KOSTEN_STAFFEL = { # Kosten für die Entleerung pro Tonnengröße (alle zwei Wochen)
     80: round(177.84 / 52 * 2 , 4), 
     120: round(230.88 / 52 * 2, 4), 
     240: round(382.20 / 52 * 2, 4), 
