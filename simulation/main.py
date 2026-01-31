@@ -45,7 +45,7 @@ ANZAHL_DURCHLAEUFE = 1000 # Anzahl der Simulationsdurchläufe
 
 
 if __name__ == "__main__": 
-    os.makedirs("../output", exist_ok=True) # Output-Ordner anlegen (falls nicht schon vorhanden ist) zur Speicherung der Ergebniss Dateien (Bilder, CSV)
+    os.makedirs("output", exist_ok=True) # Output-Ordner anlegen (falls nicht schon vorhanden ist) zur Speicherung der Ergebniss Dateien (Bilder, CSV)
     print("[Info] Simulation gestartet.")
     # Simulation
     summary = simulationslauf(SZENARIEN, HANDLUNGSOPTIONEN, ANZAHL_DURCHLAEUFE) 
