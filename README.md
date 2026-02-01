@@ -50,7 +50,7 @@ Die in der Simulation generierten Grafiken sowie die Ergebnistabelle im CSV-Form
 
 4. **Führen Sie das Simulation aus**
 
-    Führen Sie die Datei `simulation/main.py` aus. 
+    Führen Sie die Datei `simulation/main.py` aus. Die Ausführung kann einige Minuten dauern.
 
     Alternativ kann auch der folgende Shell Befehlt ausgeführt werden:
 
