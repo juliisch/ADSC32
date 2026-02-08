@@ -1,6 +1,6 @@
 # ADSC32
 
-Dieses Repository enthält den Code-Teil der Studienarbeit für das Modul ADSC32 Applied Data Science III: Softwareparadigmen (Exam performance). 
+Dieses Repository enthält den Code-Teil der Studienarbeit für das Modul ADSC32 Applied Data Science III: Softwareparadigmen. 
 
 Der Ordner `simulation` umfasst sämtliche Python-Dateien, die zur Ausführung und Steuerung der Simulation benötigt werden:
 - `funktionen.py`: Enthält alle definierten Hilfsfunktionen, welche innerhalb der Simulation verwendet werden.
@@ -11,7 +11,7 @@ Der Ordner `simulation` umfasst sämtliche Python-Dateien, die zur Ausführung u
 Die in der Simulation generierten Grafiken sowie die Ergebnistabelle im CSV-Format werden im Ordner `output`  gespeichert.
 
 
-### Installation
+### Installation und Ausführung der Simulation
 
 1. **Klonen Sie das Repository und wechseln Sie in das Verzeichnis**
 
@@ -46,7 +46,7 @@ Die in der Simulation generierten Grafiken sowie die Ergebnistabelle im CSV-Form
     pip install -r requirements.txt
     ```
 
-    Nach der Installation der Bibliotheken ist es erforderlich, das Programm neu zu starten, damit diese wirksam werden.
+    Nach der Installation der Bibliotheken kann es vorkommen, dass ein Neustart des Programms erforderlich ist, damit die Bibliotheken wirksam werden.
 
 4. **Führen Sie das Simulation aus**
 
