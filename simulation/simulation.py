@@ -170,7 +170,9 @@ class MuellentsorgungsSystem:
     
     # Prozess: Überfuellung ---
     def ueberfuellung(self):
-        for tag in range(TAGE):
+        while True:
+            tag = int(self.env.now)
+
             # Bestimmung des Datums des aktuellen Tages (Für Feiertag)
             tag_datum = date(START_JAHR, 1, 1) + timedelta(days=tag)
 
