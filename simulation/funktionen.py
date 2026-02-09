@@ -32,7 +32,7 @@ Funktionsweise:     Bei einer Überfüllung werden pro angefangene 70 Liter der 
 
 # Quelle: Abfallwirtschaftsbetrieb München. Tonnen für Privathaushalte. Abgerufen am 12.01.2026 von https://www.awm-muenchen.de/abfall-entsorgen/muelltonnen/fuer-haushalte
 """
-def sonderkosten_aus_ueberfuellung(ueber_liter):
+def ueberfuellungskosten(ueber_liter):
     kosten_sonderentleerung = math.ceil(ueber_liter / 70) * 9 if ueber_liter > 0 else 0
     return kosten_sonderentleerung
 
@@ -43,9 +43,9 @@ Funktion:           Berechnet die Überfüllungsrate der Restmülltonne in Proze
 Input:              fuellstand (Füllstand der Restmülltonne in Litern)
                     kapazitaet (Kapazität der Restmülltonne in Litern)
 Output:             rate (Überfüllungsrate in Prozent)
-Funktionsweise:     Es wird zunächst die Überfüllungsmenge in Liter bestimmt (Übermenge = Füllstand - Kapazität). 
+Funktionsweise:     Es wird zunächst die Überfüllungsmenge in Liter bestimmt (Überfüllungsmenge = Füllstand - Kapazität). 
                     Es gibt keine negative Überfüllungsmenge (entsteht, wenn die maximale kapazitaet nicht erreicht wurde). Negative Werte werden bei 0 gekappt.
-                    Anschließend wird der Anteil der Überfüllung bestimmt (Übermenge/Kapazität) in Prozent.
+                    Anschließend wird der Anteil der Überfüllung (Überfüllungsmenge/Kapazität) in Prozent bestimmt.
 """
 def ueberfuellungsrate(fuellstand, kapazitaet):
     rate = max(0.0, (fuellstand - kapazitaet) / kapazitaet * 100)
@@ -63,7 +63,7 @@ Funktionsweise:     Abhängig von der betrachteten Tage, wird der betrachtete Ze
                     Für jedes betrachtete Jahr werden die Feiertage bestimmt. 
                     Es wird angenommen, dass das Wohnhaus in München, Bayern steht. 
                     Dadurch gelten die bayerischen Feiertage.
-                    Für jeden Tag wird geprüft, ob dieser auf den Leertag fällt und es sich um einen Feiertag fällt. 
+                    Für jeden Tag wird geprüft, ob dieser auf den Leertag fällt und ob es sich um einen Feiertag handelt. 
                     Jene Tage, für welche beiden Bedingungen erfüllt sind, wird das Datum in die Ausgabeliste hinzugefügt.
 """
 def berechne_feiertage(leertag, tage, start_jahr):
@@ -131,11 +131,11 @@ Input:              ergebnisse (Simulationsergebnisse)
                     szenario_name (Szenarioname)
                     handlungsoption_name (Handlungsoptionsname)
 Funktionsweise:     Für die beiden Metriken kosten_tag (Gesamtkosten) und muellmenge_tag (Gesamtmüllmenge) werden die gesamten Simulationswerte aggregiert.
-                    Für jede Metrik wird ein Histogramm erzeugt und als PNG-Datei gespeichert
+                    Für jede Metrik wird ein Histogramm erzeugt und als png-Datei gespeichert
 """
 def grafik_histogramme(ergebnisse, szenario_name, handlungsoption_name):
     # Aggregation der Werte
-    gesamtkosten = [sum(ergebnis["kosten_tag"]) for ergebnis in ergebnisse]  #Gesamtkosten
+    gesamtkosten = [sum(ergebnis["kosten_tag"]) for ergebnis in ergebnisse]  # Gesamtkosten
     gesamtmuell = [sum(ergebnis["muellmenge_tag"]) for ergebnis in ergebnisse] # Gesamtmüllmenge
 
     list_plot_info = [
