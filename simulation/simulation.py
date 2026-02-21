@@ -14,7 +14,7 @@ Diese Datei beinhaltet die Simulationslogik.
 import random
 import simpy
 # Globale Paramter importieren
-from parameter import TAGE, START_JAHR, ANZAHL_BEWOHNER,  P_ABWESEND, DEFAULT_RESTMUELL_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_FUELLMENGE_PROZENT
+from parameter import TAGE, START_JAHR, ANZAHL_BEWOHNER,  P_ABWESEND, RESTMUELL_MENGE_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_FUELLMENGE_PROZENT
 # Importiere alle Hilfsfunktionen
 from funktionen import *
 
@@ -99,12 +99,12 @@ def simulationslauf(szenarien, handlungsoptionen, durchlaeufe):
 # ---------- Klassenmodell (Simulationslogik) ----------
 """
 Jeder Simulationsschritt entspricht einen Kalendertag.  
+Der Leertag der Mülltage wird zu Beginn der Simulation per Zufall gefällt.
 Jeden Tag wird Müll durch die Bewohner und ggf. den Gästen erzeugt. Die Anzahl der Besucher wird per Zufall betsimmt. 
 Der Müll wird in die Mülltonne geschmissen (Füllstand hinzugefügt).
-Der Leertag der Mülltage wird zu Beginn der Simulation per Zufall gefällt.
 Alle 14 Tage erfolgt eine reguläre Leerung, solange der Leertag nicht auf einen Feiertag oder Ausfalltag fällt.
-Kommt es zu einer Überfüllung (Müllmenge > Kapazität), so entstehen Überfüllungszusatzkosten bei der Abhlung.
-Bei mehrfacher Überfüllung kann (wenn die Kapazitäten es hergeben) die Tonnenkapazität erhöht werden. 
+Kommt es zu einer Überfüllung (Müllmenge > Kapazität), so entstehen Überfüllungszusatzkosten bei der Abholung.
+Bei mehrfacher Überfüllung kann, wenn die Kapazitäten es hergeben, die Tonnenkapazität erhöht werden. 
 Bei der Handlungsoption Sonderentleerung wird beim Erreichen eines bestimmten Füllstands die Leerung ausgelöst. Diese verusacht zusätzliche Kosten.
 """
 class MuellentsorgungsSystem:
@@ -118,7 +118,7 @@ class MuellentsorgungsSystem:
         self.leertag = self.rng.randint(0, 4) # Montag=0/Dienstag=1/Mittwoch=2/Donnerstag=3/Freitag=4
         # Feiertage, die auf den Leertag fallen
         self.feiertage = berechne_feiertage(self.leertag, TAGE, START_JAHR)
-        # Zähler seit letzter Leerung
+        # Tageszähler: Tage seit letzter Leerung
         self.tage_seit_letzter_leerung = 0
 
         # Mülltonnen Startwerte
@@ -143,6 +143,7 @@ class MuellentsorgungsSystem:
     def muellzyklus_taeglich(self):
         while True:
             tag = int(self.env.now)
+            
             # Bestimmung des Datums des aktuellen Tages (Für Feiertag)
             tag_datum = date(START_JAHR, 1, 1) + timedelta(days=tag)
             self.tage_seit_letzter_leerung += 1
@@ -161,13 +162,13 @@ class MuellentsorgungsSystem:
             # Mit eines Wahrscheinlichkeit sind die Bewohner aus dem Haus
             if self.rng.random() < P_ABWESEND:
                 anzahl_bewohner = self.rng.randint(0, anzahl_bewohner)
-            self.fuellstand += anzahl_bewohner * DEFAULT_RESTMUELL_PRO_PERSON_TAG
+            self.fuellstand += anzahl_bewohner * RESTMUELL_MENGE_PRO_PERSON_TAG
 
             # Müll der Gäste (Szenario: erhöhter Besuch)
             anzahl_gaeste = 0
             if self.rng.random() < self.szenario["P_BESUCH"]:
                 anzahl_gaeste = self.rng.randint(1, 10)  # Besucheranzahl zwischen 1 und 10
-                self.fuellstand += anzahl_gaeste * DEFAULT_RESTMUELL_PRO_PERSON_TAG * 0.25 # Müllmenge der Gäste entspricht lediglich 25 Prozent des reguläten Müllaufkommen pro Person
+                self.fuellstand += anzahl_gaeste * RESTMUELL_MENGE_PRO_PERSON_TAG * 0.25 # Müllmenge der Gäste entspricht lediglich 25 Prozent des reguläten Müllaufkommen pro Person
             
             self.anzahl_bewohner_tag.append(anzahl_bewohner) # Metrik (Anzahl der Bewohner)
             self.anzahl_besuch_tag.append(anzahl_gaeste) # Metrik (Anzahl der Besucher)

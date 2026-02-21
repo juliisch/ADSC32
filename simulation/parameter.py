@@ -19,7 +19,7 @@ P_ABWESEND = 0.05 # Wahrscheinlichkeit, dass ein Bewohner oder Bewohnerin nicht 
 # Szenario: Normales Müllaufkommen
 # Durchschnittler Restmüllaufkommen pro Person und Tag
 # Quelle: Abfallwirtschaftsbetrieb München. Tonnen für Privathaushalte. Abgerufen am 12.01.2026 von https://www.awm-muenchen.de/abfall-entsorgen/muelltonnen/fuer-haushalte
-DEFAULT_RESTMUELL_PRO_PERSON_TAG = 30/7  # Liter/Tag und Person
+RESTMUELL_MENGE_PRO_PERSON_TAG = 30/7  # Liter/Tag und Person
 
 # Handlungsoption: Kapazitätsausbau
 # Verfügbare Tonnenkapazitäten (in Liter) und Tonnenkosten pro Tag

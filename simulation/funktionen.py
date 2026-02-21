@@ -21,7 +21,7 @@ from datetime import date, timedelta
 import matplotlib.image as mpimg
 from pathlib import Path
 # Globale Paramter importieren
-from parameter import TAGE, START_JAHR,  P_ABWESEND, DEFAULT_RESTMUELL_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_FUELLMENGE_PROZENT
+from parameter import TAGE, START_JAHR,  P_ABWESEND, RESTMUELL_MENGE_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_FUELLMENGE_PROZENT
 
 
 """
@@ -44,7 +44,7 @@ Input:              fuellstand (Füllstand der Restmülltonne in Litern)
                     kapazitaet (Kapazität der Restmülltonne in Litern)
 Output:             rate (Überfüllungsrate in Prozent)
 Funktionsweise:     Es wird zunächst die Überfüllungsmenge in Liter bestimmt (Überfüllungsmenge = Füllstand - Kapazität). 
-                    Es gibt keine negative Überfüllungsmenge (entsteht, wenn die maximale kapazitaet nicht erreicht wurde). Negative Werte werden bei 0 gekappt.
+                    Es gibt keine negative Überfüllungsmenge (würde entstehen, wenn die maximale kapazitaet nicht erreicht wurde) --> Negative Werte werden bei 0 gekappt.
                     Anschließend wird der Anteil der Überfüllung (Überfüllungsmenge/Kapazität) in Prozent bestimmt.
 """
 def ueberfuellungsrate(fuellstand, kapazitaet):
@@ -61,8 +61,7 @@ Input:              leertag (Wochentag, an dem die Müll geleert wird)
 Output:             leertag_feiertage (Liste der Feiertage, auf denen der Leertag fällt)
 Funktionsweise:     Abhängig von der betrachteten Tage, wird der betrachtete Zeitraum bestimmt.
                     Für jedes betrachtete Jahr werden die Feiertage bestimmt. 
-                    Es wird angenommen, dass das Wohnhaus in München, Bayern steht. 
-                    Dadurch gelten die bayerischen Feiertage.
+                    Es wird angenommen, dass das Wohnhaus in München, Bayern steht. Dadurch gelten die bayerischen Feiertage.
                     Für jeden Tag wird geprüft, ob dieser auf den Leertag fällt und ob es sich um einen Feiertag handelt. 
                     Jene Tage, für welche beiden Bedingungen erfüllt sind, wird das Datum in die Ausgabeliste hinzugefügt.
 """
@@ -94,22 +93,18 @@ Funktionsweise:     Für die numerische Metriken wird der Durschnitt, der Maxima
                     Für die Boolean Metrik wird die Anzahl der Ausfallfälle und die Quote in Prozent berechnet.
 """
 def berechnung_statistiken(ergebnisse):
-
     statstiken = {}
 
     # Metriken der Simulationsergebnisse
     metriken = [k for k in ergebnisse[0].keys()] 
 
     for metrik in metriken:
-        
-
         # Zusammenführung der Werte zu einer gesamten Liste
         werte = []
         for ergebnis in ergebnisse:
             werte.extend(ergebnis[metrik])
-
         metrik = metrik.removesuffix("_tag") # Suffix entfernen (für eine schönere Ausgabe)
-
+        
         # Boolean Metrik (ausfall_tag)
         if werte and isinstance(werte[0], bool):
             statstiken[metrik] = {
@@ -117,14 +112,13 @@ def berechnung_statistiken(ergebnisse):
                 "Quote": round((sum(werte) / len(werte)*100), 3),  
             }
             continue
-
+        
         # Numerische Metrik
         statstiken[metrik] = {
             "Durchchschnitt": round(stats.mean(werte),3),
             "Minimalwert": round(min(werte),3),
             "Maximalwert": round(max(werte), 3),
         }
-
     return statstiken
 
 
@@ -178,7 +172,6 @@ def ausgabe_csv(results_summary):
                         "Handlungsoption": handlungsoption,
                         "Wert": wert,
             })
-
     df_out = pd.DataFrame(element)
     df_out = df_out.pivot_table(index=["Metrik", "Kennzahl"], columns=["Szenario", "Handlungsoption"],values="Wert")
     return df_out
@@ -188,29 +181,23 @@ def ausgabe_csv(results_summary):
 """
 Funktion:           Zusammenführung der einzelnen Histogramme zu einer Gesamtgrafik
 Input:              metrik_name (Name der Metrik)
-Funktionsweise:     Für alle erzeugten Grafiken der Gesamtkosten und Gesamtmüllmenge werden die Kombinationen aus Szenarien und Handlungsoptionen pro Metrik geladen und in einer 3×3-Subplot-Grafik zusammengeführt und gespeichert.
+Funktionsweise:     Für alle erzeugten Grafiken der Gesamtkosten und Gesamtfüllmenge werden die Kombinationen aus Szenarien und Handlungsoptionen pro Metrik geladen und in einer 3×3-Subplot-Grafik zusammengeführt und gespeichert.
 """
 def gerniere_subplot(metrik_name):
-
     szenarien = ["Normal", "Besuch", "Ausfall"]
     handlungsoptionen = ["feste Abholintervalle","Kapazitaetsausbau", "Sonderentleerung"]
-
     fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(20, 10))
 
     for z, zustand in enumerate(szenarien):
         for m, massnahme in enumerate(handlungsoptionen):
             ax = axes[z, m]
-
             img_path =  f"output/histogramm_{metrik_name}_{zustand}_{massnahme}.png" # Bild laden
-
             img = mpimg.imread(img_path)
             ax.imshow(img)
             ax.axis("off")
-
             # Spalten Titel
             if z == 0:
                 ax.set_title(massnahme, fontsize=12)
-
     plt.tight_layout()
     plt.savefig(os.path.join("output",f"histogramm_{metrik_name}.png")) # Bild speichern
 

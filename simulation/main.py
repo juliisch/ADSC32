@@ -12,7 +12,7 @@ Diese Datei beinhaltet den Simulationsstart. Zum Starten der Simulation muss die
 # ---------- Imports ----------
 import os
 # Globale Paramter importieren
-from parameter import TAGE, START_JAHR, ANZAHL_BEWOHNER, P_ABWESEND,  DEFAULT_RESTMUELL_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_FUELLMENGE_PROZENT
+from parameter import TAGE, START_JAHR, ANZAHL_BEWOHNER, P_ABWESEND,  RESTMUELL_MENGE_PRO_PERSON_TAG, REST_MUELLTONE_STAFFEL, REST_MUELLTONE_KOSTEN_STAFFEL, SONDERENTLEERUNG_FUELLMENGE_PROZENT
 from funktionen import ausgabe_csv, gerniere_subplot
 from simulation import simulationslauf
 
@@ -45,16 +45,16 @@ ANZAHL_DURCHLAEUFE = 1000 # Anzahl der Simulationsdurchläufe
 
 
 if __name__ == "__main__": 
-    os.makedirs("output", exist_ok=True) # Output-Ordner anlegen (falls nicht schon vorhanden ist) zur Speicherung der Ergebniss Dateien (Bilder, CSV)
+    os.makedirs("output", exist_ok=True) # Output-Ordner anlegen (falls nicht schon vorhanden ist) zur Speicherung der Ergebnisdateien (Bilder, CSV)
     print("[Info] Simulation gestartet.")
     # Simulation
     summary = simulationslauf(SZENARIEN, HANDLUNGSOPTIONEN, ANZAHL_DURCHLAEUFE) 
     # Simulationsergebnisse
     df_results = ausgabe_csv(summary) 
-    df_results.to_csv("output/simulation_ergebnisse.csv") # Speicherung der Ergebnistabelle als CSV.
+    df_results.to_csv("output/simulation_ergebnisse.csv") # Speicherung der Ergebnistabelle als CSV
     print("[Info] Simulation beendet.")
 
-    # Die einzelnen Plots der Gesamtkosten und des Gesamtmülls werden in einem 3x3 Plot gespeichert
+    # Die einzelnen Plots der Gesamtkosten und der Gesamtfüllmenge werden in einem 3x3 Plot gespeichert
     gerniere_subplot("gesamtkosten")
     gerniere_subplot("gesamtfuellmenge")
 
