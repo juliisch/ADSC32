@@ -42,7 +42,7 @@ def simulation_einzeln(seed, szenario, handlungsoption):
         "kosten_tag": model.kosten_tag,
         "anzahl_bewohner_tag": model.anzahl_bewohner_tag, 
         "anzahl_besuch_tag": model.anzahl_besuch_tag,
-        "muellmenge_tag": model.muellmenge_tag,
+        "fuellmenge_tag": model.fuellmenge_tag,
         "kapazitaet_tag": model.kapazitaet_tag,
         "ueberfuellungsrate_tag": model.ueberfuellungsrate_tag,
         "sonderentleerung_kosten_tag": model.sonderentleerung_kosten_tag,
@@ -103,7 +103,7 @@ Jeden Tag wird Müll durch die Bewohner und ggf. den Gästen erzeugt. Die Anzahl
 Der Müll wird in die Mülltonne geschmissen (Füllstand hinzugefügt).
 Der Leertag der Mülltage wird zu Beginn der Simulation per Zufall gefällt.
 Alle 14 Tage erfolgt eine reguläre Leerung, solange der Leertag nicht auf einen Feiertag oder Ausfalltag fällt.
-Kommt es zu einer Überfüllung (Müllmenge > Kapazität), so entstehen Überfüllungszusatzkosten.
+Kommt es zu einer Überfüllung (Müllmenge > Kapazität), so entstehen Überfüllungszusatzkosten bei der Abhlung.
 Bei mehrfacher Überfüllung kann (wenn die Kapazitäten es hergeben) die Tonnenkapazität erhöht werden. 
 Bei der Handlungsoption Sonderentleerung wird beim Erreichen eines bestimmten Füllstands die Leerung ausgelöst. Diese verusacht zusätzliche Kosten.
 """
@@ -118,6 +118,8 @@ class MuellentsorgungsSystem:
         self.leertag = self.rng.randint(0, 4) # Montag=0/Dienstag=1/Mittwoch=2/Donnerstag=3/Freitag=4
         # Feiertage, die auf den Leertag fallen
         self.feiertage = berechne_feiertage(self.leertag, TAGE, START_JAHR)
+        # Zähler seit letzter Leerung
+        self.tage_seit_letzter_leerung = 0
 
         # Mülltonnen Startwerte
         self.kapazitaet = 80 # Kapazität
@@ -129,129 +131,110 @@ class MuellentsorgungsSystem:
         self.anzahl_bewohner_tag = [] # Anzahl der Bewohner
         self.anzahl_besuch_tag = [] # Anzahl der Besucher
         self.ausfall_tag = [] # Indikator, ob Ausfall stattgefunden hat
-        self.muellmenge_tag = [] # Füllmenge der Tonne
+        self.fuellmenge_tag = [] # Füllmenge der Tonne
         self.kapazitaet_tag = [] # Kapazität der Tonne
         self.ueberfuellungsrate_tag = [] # Überfüllungsrate
         self.sonderentleerung_kosten_tag = [] # Kosten für die Sonderentleerung
         self.ueberfuellung_kosten_tag = [] # Kosten bei Überfüllung 
 
         # Prozess starten 
-        self.env.process(self.muellproduktion()) # Müllproduktion
-        self.env.process(self.ueberfuellung()) # Überfüllung wird geprüft
-        self.env.process(self.leerung_regulaere()) # Reguläre Leerung der Tonne (alle 14 Tage)
-        self.env.process(self.leerung_sonder()) # Sonderleerung (bei Handlungsoption Sonderentleerung)
-        
+        self.env.process(self.muellzyklus_taeglich()) # Müllzyklus (Entstehung bis Entsorgung)
 
-    # Prozess: Müllproduktion  ---
-    def muellproduktion(self):
+    def muellzyklus_taeglich(self):
         while True:
             tag = int(self.env.now)
-            # Müll der Bewohner (Szenario: Normales Müllaufkommen)
-            anzahl_bewohner = ANZAHL_BEWOHNER 
+            # Bestimmung des Datums des aktuellen Tages (Für Feiertag)
+            tag_datum = date(START_JAHR, 1, 1) + timedelta(days=tag)
+            self.tage_seit_letzter_leerung += 1
+
+            # Indikator, ob Tag ein Leertag ist (Wenn Tag auf Wochen-Leertag fällt und zwei Wochen seit der letzten Leerung vergangen sind)
+            ist_leertag = (tag_datum.weekday() == self.leertag and self.tage_seit_letzter_leerung >= 14)
+            # Indikator, ob Tag ein Feiertag ist
+            ist_feiertag = (tag_datum in self.feiertage)
+
+
+            # -------------------------
+            # Prozess: Müllproduktion  
+
+            # Müll der Bewohner (Szenario: Normales Müllaufkommen):
+            anzahl_bewohner = ANZAHL_BEWOHNER
             # Mit eines Wahrscheinlichkeit sind die Bewohner aus dem Haus
             if self.rng.random() < P_ABWESEND:
                 anzahl_bewohner = self.rng.randint(0, anzahl_bewohner)
             self.fuellstand += anzahl_bewohner * DEFAULT_RESTMUELL_PRO_PERSON_TAG
 
             # Müll der Gäste (Szenario: erhöhter Besuch)
-            if self.rng.random() < self.szenario["P_BESUCH"]: 
-                anzahl_gaeste = self.rng.randint(1, 10) # Besucheranzahl zwischen 1 und 10
-                self.fuellstand += anzahl_gaeste * DEFAULT_RESTMUELL_PRO_PERSON_TAG * 0.15 # Müllmenge der Gäste entspricht lediglich 15 Prozent des reguläten Müllaufkommen pro Person
-                self.anzahl_besuch_tag.append(anzahl_gaeste)
+            anzahl_gaeste = 0
+            if self.rng.random() < self.szenario["P_BESUCH"]:
+                anzahl_gaeste = self.rng.randint(1, 10)  # Besucheranzahl zwischen 1 und 10
+                self.fuellstand += anzahl_gaeste * DEFAULT_RESTMUELL_PRO_PERSON_TAG * 0.25 # Müllmenge der Gäste entspricht lediglich 25 Prozent des reguläten Müllaufkommen pro Person
+            
+            self.anzahl_bewohner_tag.append(anzahl_bewohner) # Metrik (Anzahl der Bewohner)
+            self.anzahl_besuch_tag.append(anzahl_gaeste) # Metrik (Anzahl der Besucher)
+            self.ueberfuellungsrate_tag.append(ueberfuellungsrate(self.fuellstand, self.kapazitaet)) # Metrik (Überfüllungsrate)
+            self.fuellmenge_tag.append(self.fuellstand) # Metrik (Füllmenge der Tonne )
+            self.kapazitaet_tag.append(self.kapazitaet) # Metrik (Kapazität der Tonne)
 
-            # Metriken
-            self.anzahl_bewohner_tag.append(anzahl_bewohner)
-            self.muellmenge_tag.append(self.fuellstand) # Füllmenge der Tonne 
-            self.kapazitaet_tag.append(self.kapazitaet) # Kapazität der Tonne
-            self.ueberfuellungsrate_tag.append(ueberfuellungsrate(self.fuellstand, self.kapazitaet)) # Überfüllungsrate
+            # -------------------------
+            # Prozess: reguläre Leerung (Szenario: Normales Müllaufkommen/Ausfall) - Teil 1: Indikator
+            # Wenn Tag auf Leertag fällt, Tag keine Feiertag ist und an dem Tag kein Ausfall stattfindet (Szenario: Ausfall) wird geleert 
+            ist_ausfall = False
+            findet_regulaere_leerung_statt = False
+            if ist_leertag and (not ist_feiertag):
+                if self.rng.random() <= self.szenario["P_AUSFALL"]:
+                    ist_ausfall = True
+                else:
+                    findet_regulaere_leerung_statt = True
+                self.tage_seit_letzter_leerung = 0 # Zwei Wochen Zähler wird zurückgesetzte
+            self.ausfall_tag.append(ist_ausfall) # Metriken (Indikator, ob Ausfall stattgefunden hat)
 
-            # Zeitfortschritt (1 Zeiteinheit = 1 Tag)
-            yield self.env.timeout(1)
-    
-    # Prozess: Überfuellung ---
-    def ueberfuellung(self):
-        while True:
-            tag = int(self.env.now)
+            # -------------------------
+            # Prozess: Sonderentleerung (Handlungsoption: Sonderentleerung)
+            kosten_sonderentleerung = 0
+            # Wenn die Handlungsoption Sonderentleerung in der Simulation betrachtet wird, keine reguläre Leerung stattfindet und der Schwellenwert für die Sonderentleerung erreicht ist, findet eine Sonderentleerung statt
+            if (not findet_regulaere_leerung_statt and self.handlungsoption["sonderentleerung"] and (self.fuellstand / self.kapazitaet * 100) >= SONDERENTLEERUNG_FUELLMENGE_PROZENT):
+                self.fuellstand = 0 # Tonne wird geleert --> Füllstand wird zurückgesetzt, auf 0 
+                kosten_sonderentleerung = REST_MUELLTONE_KOSTEN_STAFFEL[self.kapazitaet] * 1.4 # Sonderkosten liegen 140 Prozent über den normal Kosten
+                # Quelle: Abfallwirtschaft Hohenlohekreis. Qualitätsoffensive. Abgerufen am 25.01.2026 von https://www.abfallwirtschaft-hohenlohekreis.de/leistungen-gebühren/qualitätsoffensive
+            self.sonderentleerung_kosten_tag.append(kosten_sonderentleerung) # Metrik (Kosten für die Sonderentleerung)
 
-            # Bestimmung des Datums des aktuellen Tag (für Feiertag)
-            tag_datum = date(START_JAHR, 1, 1) + timedelta(days=tag)
-
-            # Wenn Tag auf Leertag fällt, Tag keine Feiertag ist und an dem Tag kein Ausfall stattfindet (Szenario: Ausfall) wird geleert --> Überfüllungskosten/Kapazitätsausbau (Handlungsoption: Kapazitätsausbau) findet statt
-            if tag % 14 == self.leertag and tag_datum not in self.feiertage and self.rng.random() > self.szenario["P_AUSFALL"]:
-
-                # Überfüllungskosten
+            # -------------------------
+            # Prozess: Überfuellung
+            kosten_ueberfuellung = 0
+            if findet_regulaere_leerung_statt:
+                # Überfüllungskosten:
                 ueber_liter = max(0, self.fuellstand - self.kapazitaet) # Überfüllungsmenge in Liter
                 kosten_ueberfuellung = ueberfuellungskosten(ueber_liter) # Überfüllungskosten
-                # Metriken
-                self.ueberfuellung_kosten_tag.append(kosten_ueberfuellung) # Kosten bei Überfüllung 
                 
-                ueberrate = ueberfuellungsrate(self.fuellstand, self.kapazitaet)
-
-
-                # Anzahl der Überfülllungen 
-                if ueberrate >= 100:
+                # Anzahl der Überfülllungen:
+                if self.fuellstand > self.kapazitaet:
                     self.wochen_ueberfuellt += 1
                 else:
                     self.wochen_ueberfuellt = 0
 
-                # Wenn die Handlungsoption Kapazitaetsausbau in der Simulation betrachtet wird und in drei aufeianderfolgendenden Wochen es zu einer Überfüllung kam, wird die Kapazität erweitert.
+                # Wenn die Handlungsoption Kapazitaetsausbau in der Simulation betrachtet wird und in nach drei aufeianderfolgendenden Leerungen es zu einer Überfüllung kam, wird die Kapazität erweitert.
                 if self.handlungsoption["kapazitaetsausbau"] and self.wochen_ueberfuellt >= 3:
                     # Bestimmung der möglichen Kapazitätsgrößen
                     potenzielle_tonnen_kapa = [kapa for kapa in REST_MUELLTONE_STAFFEL if kapa > self.kapazitaet]
                     if potenzielle_tonnen_kapa:
                         self.kapazitaet = min(potenzielle_tonnen_kapa) # Auswahl der nächst größeren Kapazität
                     self.wochen_ueberfuellt = 0 # Zähler für Überfüllungsanzahl auf 0 setzten
+            self.ueberfuellung_kosten_tag.append(kosten_ueberfuellung) # Metrik (Kosten bei Überfüllung) 
 
-                # Gesamtkosten (Basiskosten + Überfüllung + Sonderleerung)
-                kosten = REST_MUELLTONE_KOSTEN_STAFFEL[self.kapazitaet]
-                kosten_sonderentleerung = self.sonderentleerung_kosten_tag[-1] if self.sonderentleerung_kosten_tag else 0
-                kosten_gesamt = kosten + kosten_sonderentleerung + kosten_ueberfuellung
-                # Metriken
-                self.kosten_tag.append(kosten_gesamt)  # Kosten
-            else:
-                # Bei Feiertagen/Ausfall fällt keine Leerung an --> keine Kosten, keine Überfüllungskosten
-                self.ueberfuellung_kosten_tag.append(0)
-                self.kosten_tag.append(0)
+            # -------------------------
+            # Prozess: reguläre Leerung (Szenario: Normales Müllaufkommen/Ausfall) - Teil 2: Tatsächliche Leerung inkl. Kostenbestimmung
+            tonnen_kosten = 0
+            if findet_regulaere_leerung_statt:
+                self.fuellstand = 0
+                tonnen_kosten = REST_MUELLTONE_KOSTEN_STAFFEL[self.kapazitaet]
 
-            yield self.env.timeout(1)
-
-    # Prozess: reguläre Leerung (Szenario: Normales Müllaufkommen/Ausfall) ---
-    def leerung_regulaere(self):
-        while True:
-            tag = int(self.env.now)
-            # Bestimmung des Datums des aktuellen Tages (Für Feiertag)
-            tag_datum = date(START_JAHR, 1, 1) + timedelta(days=tag)
-            # Wenn Tag auf Leertag fällt, Tag keine Feiertag ist und an dem Tag kein Ausfall stattfindet (Szenario: Ausfall) wird geleert 
-            ist_ausfall = False
-            if tag % 14 == self.leertag and tag_datum not in self.feiertage:
-                if self.rng.random() <= self.szenario["P_AUSFALL"]:
-                    ist_ausfall = True
-                else:
-                    self.fuellstand = 0  #  Tonne wird geleert --> Füllstand wird zurückgesetzt, auf 0 
-            # Metriken
-            self.ausfall_tag.append(ist_ausfall) # Indikator ob Ausfall stattgefunden hat
+            # Gesamtkosten (Basiskosten + Überfüllung + Sonderleerung)
+            self.kosten_tag.append(tonnen_kosten + kosten_ueberfuellung + kosten_sonderentleerung) # Metrik (Kosten)
 
             # Zeitfortschritt (1 Zeiteinheit = 1 Tag)
-            yield self.env.timeout(1)
+            yield self.env.timeout(1) 
 
-    # Prozess: Sonderentleerung (Handlungsoption: Sonderentleerung) ---
-    def leerung_sonder(self):
-        while True:
-            kosten_sonderentleerung = 0
-            # Wenn die Handlungsoption Sonderentleerung in der Simulation betrachtet wird, und der Schwellenwert für die Sonderentleerung erreicht ist, findet eine Sonderentleerung statt
-            if (self.handlungsoption["sonderentleerung"] and ueberfuellungsrate(self.fuellstand, self.kapazitaet)>= SONDERENTLEERUNG_FUELLMENGE_PROZENT):
-                self.fuellstand = 0 # Tonne wird geleert --> Füllstand wird zurückgesetzt, auf 0 
-                
-                kosten_sonderentleerung = REST_MUELLTONE_KOSTEN_STAFFEL[self.kapazitaet] * 2.4 # Sonderkosten liegen 240 Prozent über den normal Kosten
-                # Quelle: Abfallwirtschaft Hohenlohekreis. Qualitätsoffensive. Abgerufen am 25.01.2026 von https://www.abfallwirtschaft-hohenlohekreis.de/leistungen-gebhren/qualittsoffensive
-
-            # Metriken
-            self.sonderentleerung_kosten_tag.append(kosten_sonderentleerung) #  Kosten für die Sonderentleerung
-
-            # Zeitfortschritt (1 Zeiteinheit = 1 Tag)
-            yield self.env.timeout(1)
-
-
+    
 # --------------------------
 # ---------- Ende ----------
 # --------------------------

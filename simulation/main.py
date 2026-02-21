@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     # Die einzelnen Plots der Gesamtkosten und des Gesamtmülls werden in einem 3x3 Plot gespeichert
     gerniere_subplot("gesamtkosten")
-    gerniere_subplot("gesamtmuell")
+    gerniere_subplot("gesamtfuellmenge")
 
 # --------------------------
 # ---------- Ende ----------

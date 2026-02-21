@@ -68,7 +68,11 @@ Funktionsweise:     Abhängig von der betrachteten Tage, wird der betrachtete Ze
 """
 def berechne_feiertage(leertag, tage, start_jahr):
     start_date = date(start_jahr, 1, 1) # Startdatum
-    feiertage = holidays.Germany(years=start_jahr, subdiv="BY") # Liste der bayerischen Feiertage
+    end_date = start_date + timedelta(days=tage-1) # Enddatum
+
+    jahre = range(start_date.year, end_date.year + 1) # Bestimme die betracheteten Jahre
+
+    feiertage = holidays.Germany(years=jahre, subdiv="BY") # Liste der bayerischen Feiertage
     leertag_feiertage = set()
 
     for t in range(tage): # Prüfung der einzelnen Tage
@@ -126,21 +130,21 @@ def berechnung_statistiken(ergebnisse):
 
 
 """
-Funktion:           Erstellung eines Histogramms für die Metriken Gesamtkosten und Gesamtmüllmenge
+Funktion:           Erstellung eines Histogramms für die Metriken Gesamtkosten und Gesamtfüllmenge
 Input:              ergebnisse (Simulationsergebnisse)
                     szenario_name (Szenarioname)
                     handlungsoption_name (Handlungsoptionsname)
-Funktionsweise:     Für die beiden Metriken kosten_tag (Gesamtkosten) und muellmenge_tag (Gesamtmüllmenge) werden die gesamten Simulationswerte aggregiert.
+Funktionsweise:     Für die beiden Metriken kosten_tag (Gesamtkosten) und fuellmenge_tag (Gesamtfüllmenge) werden die gesamten Simulationswerte aggregiert.
                     Für jede Metrik wird ein Histogramm erzeugt und als png-Datei gespeichert
 """
 def grafik_histogramme(ergebnisse, szenario_name, handlungsoption_name):
     # Aggregation der Werte
     gesamtkosten = [sum(ergebnis["kosten_tag"]) for ergebnis in ergebnisse]  # Gesamtkosten
-    gesamtmuell = [sum(ergebnis["muellmenge_tag"]) for ergebnis in ergebnisse] # Gesamtmüllmenge
+    gesamtfuellmenge = [sum(ergebnis["fuellmenge_tag"]) for ergebnis in ergebnisse] # Gesamtfüllmenge
 
     list_plot_info = [
         (gesamtkosten, "Gesamtkosten", "EUR", "gesamtkosten"),
-        (gesamtmuell, "Gesamtmüllmenge", "Liter", "gesamtmuell"),
+        (gesamtfuellmenge, "Gesamtfüllmenge", "Liter", "gesamtfuellmenge"),
     ]
 
     # Histogramm
